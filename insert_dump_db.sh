@@ -65,8 +65,8 @@ read -p "[y/n] Нажимая 'y' текущая бд ${DB_NAME}, полност
 echo ""
 
 if [[ "$user_input" =~ ^[Yy]$ ]]; then
-    ${DOCKER_COMPOSE_CMD} exec -T ${SERVICE_NAME} psql -U ${DB_USER} -c "\l" | grep ${DB_NAME} > /dev/null
-    exit_code=$? 
+    ${DOCKER_COMPOSE_CMD} exec -T ${SERVICE_NAME} psql -U ${DB_USER} -d postgres -c "\l" | grep ${DB_NAME} > /dev/null
+    exit_code=$?
 
     echo "INFO: Starting dump insertion from $1"
 
@@ -74,14 +74,16 @@ if [[ "$user_input" =~ ^[Yy]$ ]]; then
         stop_activ_sessions_db || exit 1
         set -e
 
-        ${DOCKER_COMPOSE_CMD} exec ${SERVICE_NAME} psql -U ${DB_USER} -c "DROP DATABASE ${DB_NAME};"
+        ${DOCKER_COMPOSE_CMD} exec ${SERVICE_NAME} psql -U ${DB_USER} -d postgres -c "DROP DATABASE \"${DB_NAME}\";" > /dev/null
         echo "INFO: DROP DATABASE ${DB_NAME}"
-    
-        ${DOCKER_COMPOSE_CMD} exec ${SERVICE_NAME} psql -U ${DB_USER} -c "CREATE DATABASE ${DB_NAME};"
-        ${DOCKER_COMPOSE_CMD} exec -T ${SERVICE_NAME} psql -U ${DB_USER} -d ${DB_NAME} <  $()"${DUMP_PATH}/$1"
+
+        ${DOCKER_COMPOSE_CMD} exec ${SERVICE_NAME} psql -U ${DB_USER} -d postgres -c "CREATE DATABASE \"${DB_NAME}\";" > /dev/null
+
+        ${DOCKER_COMPOSE_CMD} exec -T ${SERVICE_NAME} psql -U ${DB_USER} -d ${DB_NAME} < "${DUMP_PATH}/$1" > /dev/null
         echo "INFO: CREATE AND INSERT DUMP"
 
         ${DOCKER_COMPOSE_CMD} restart
+
         set +e
     else
         exit 1
