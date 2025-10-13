@@ -1,0 +1,4 @@
+db_backups
+.vscode
+.env
+.env.dump
