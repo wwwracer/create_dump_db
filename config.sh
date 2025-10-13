@@ -10,11 +10,11 @@ check_sudo() {
 }
 
 load_env() {
-    if [ -f .env.dump ]; then
-        source ./.env.dump
-        echo "INFO: .env.dump loaded"
+    if [ -f .env ]; then
+        source ./.env
+        echo "INFO: .env loaded"
     else 
-        echo "ERROR: not found .env.dump file" >&2
+        echo "ERROR: not found .env file" >&2
         exit 1
     fi
 
